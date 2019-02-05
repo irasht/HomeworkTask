@@ -1,0 +1,126 @@
+CREATE DATABASE if not exists  StoredPr_DB
+CHARACTER SET utf8 
+COLLATE utf8_general_ci;
+
+USE StoredPr_DB; 
+
+CREATE TABLE if not exists employee(
+    id                 INT               AUTO_INCREMENT,
+    surname            VARCHAR(30)       NOT NULL,
+    name               CHAR(30)          NOT NULL,
+    midle_name         VARCHAR(30),
+    identity_number    CHAR(10),
+    passport           CHAR(10),
+    experience         DECIMAL(10, 1),
+    birthday           DATE,
+    post               VARCHAR(15)       NOT NULL,
+    pharmacy_id        INT,
+    PRIMARY KEY (id)
+)ENGINE=INNODB;
+
+CREATE TABLE if not exists medicine(
+    id               INT            AUTO_INCREMENT,
+    name             VARCHAR(30)    NOT NULL,
+    ministry_code    CHAR(10),
+    recipe           BIT(1),
+    narcotic         BIT(1),
+    psychotropic     BIT(1),
+    PRIMARY KEY (id)
+)ENGINE=INNODB;
+
+CREATE TABLE if not exists medicine_zone(
+    medicine_id    INT    NOT NULL,
+    zone_id        INT    NOT NULL,
+    PRIMARY KEY (medicine_id, zone_id)
+)ENGINE=INNODB;
+
+CREATE TABLE if not exists pharmacy(
+    id                 INT            AUTO_INCREMENT,
+    name               VARCHAR(15)    NOT NULL,
+    building_number    VARCHAR(10),
+    www                VARCHAR(40),
+    work_time          TIME,
+    saturday           BIT(1),
+    sunday             BIT(1),
+    street             VARCHAR(25),
+    PRIMARY KEY (id)
+)ENGINE=INNODB;
+
+CREATE TABLE if not exists pharmacy_medicine(
+    pharmacy_id    INT    NOT NULL,
+    medicine_id    INT    NOT NULL,
+    PRIMARY KEY (pharmacy_id, medicine_id)
+)ENGINE=INNODB;
+
+CREATE TABLE if not exists post(
+    post    VARCHAR(15)    NOT NULL,
+    PRIMARY KEY (post)
+)ENGINE=INNODB;
+
+CREATE TABLE if not exists street(
+    street    VARCHAR(25)    NOT NULL,
+    PRIMARY KEY (street)
+)ENGINE=INNODB;
+
+CREATE TABLE if not exists zone(
+    id      INT            AUTO_INCREMENT,
+    name    VARCHAR(25)    NOT NULL,
+    PRIMARY KEY (id)
+)ENGINE=INNODB;
+
+INSERT INTO post(post) VALUES('інженер'),
+('водій'),
+('лікар'),
+('бухгалтер'),
+('викладач');
+
+INSERT INTO street(street) VALUES('Зелена'),
+('Наукова'),
+('Золота'),
+('Городоцька'),
+('Мазепи');
+
+INSERT INTO zone(name) VALUES('серце'),
+('горло'),
+('шлунок'),
+('очі'),
+('голова');
+
+INSERT INTO medicine (name, ministry_code, recipe, narcotic, psychotropic)
+VALUES('корвалол', '111111', 0,0,0),
+('панкреатин', '222222',  0,0,0),
+('септефрил', '333333',  0,0,0),
+('копацил', '444444',  0,0,1),
+('тропікамід', '555555',  1,1,0);
+
+INSERT INTO medicine_zone (medicine_id, zone_id) VALUES
+(1,9),
+(2,8),
+(3,7),
+(4,6),
+(5,15);
+
+INSERT INTO pharmacy(name,building_number,www, work_time, saturday,sunday,street ) 
+VALUES('Подорожник', '№5','www.podorognuk.ua', '00:24:00', 1,1,'Мазепи'),
+('Знахар', '№15','www.znahar.ua','00:08:00',1,0,'Зелена'),
+('Подорожник', '№128','www.podorognuk.ua','00:10:00',1,0,'Городоцька'),
+('Пульс', '№10','www.puls.ua','00:10:00',0,0,'Наукова'),
+('5 Державна', '№9','','00:12:00',1,0,'Золота');
+ 
+INSERT INTO employee(surname,name,midle_name,identity_number,passport,experience,birthday,post,pharmacy_id)
+VALUES('Петренко', 'Іван', 'Михайлович','1234567','КС1111', 10, '1985-06-30','інженер',1),
+('Сова', 'Марія', 'Іванівна','9123456','КС2222', 20, '1980-10-05','сімейний лікар',4),
+('Веселий', 'Дмитро', 'Степанович','8912345','КС3333', 7, '1989-09-06','водій',3),
+('Руда', 'Олена', 'Олегівна','7891234','КС4444', 3, '1992-04-12','бухгалтер',5),
+('Перекотиполе', 'Василь', 'Романович','6789123','КС5555', 30,'1965-03-29','викладач',2);
+
+INSERT INTO pharmacy_medicine 
+VALUES(15,256),
+(45,111),
+(36,128),
+(54,123),
+(25,777);
+
+
+
+
