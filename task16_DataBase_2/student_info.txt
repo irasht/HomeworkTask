@@ -1,0 +1,92 @@
+CREATE DATABASE IF NOT EXISTS student_info;
+USE student_info;
+
+CREATE TABLE IF NOT EXISTS student (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    surname VARCHAR(15) NOT NULL,
+    first_name VARCHAR(15) NOT NULL,
+    middle_name VARCHAR(15) NOT NULL,
+    photo BLOB NULL,
+    group_id INT,
+    city VARCHAR(30) NOT NULL,
+    scholarship INT NOT NULL,
+    rate DECIMAL(4.2) DEFAULT 0.0,
+    birth_date DATE NOT NULL,
+    autobiography TEXT(100) NULL     
+);
+
+CREATE TABLE IF NOT EXISTS students_group (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  group_name VARCHAR(15) NULL,
+  date_of_entery DATE NOT NULL,
+  specialty_id INT 
+  );
+
+CREATE TABLE IF NOT EXISTS specialty(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS subject (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    professor_id INT
+);
+
+CREATE TABLE IF NOT EXISTS professor (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    surname VARCHAR(15) NOT NULL,
+    first_name VARCHAR(15) NOT NULL,
+    middle_name VARCHAR(15)
+);
+CREATE TABLE IF NOT EXISTS education_result (
+    student_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    type_of_control VARCHAR(5) DEFAULT 'іспит' CHECK (type_of_control IN ('іспит' , 'залік')),
+    module1_result INT DEFAULT 0 CHECK (grade BETWEEN 0 AND 50),
+    module2_result INT DEFAULT 0 CHECK (grade BETWEEN 0 AND 50),
+    total_grade INT DEFAULT 0
+);
+
+ALTER TABLE student
+	ADD FOREIGN KEY (group_id) REFERENCES students_group (id)
+	ON UPDATE CASCADE ON DELETE SET NULL;
+    
+ALTER TABLE students_group 
+	ADD FOREIGN KEY (specialty_id) REFERENCES specialty(id)
+	ON UPDATE CASCADE ON DELETE SET NULL;
+
+ALTER TABLE subject
+	ADD FOREIGN KEY (professor_id)REFERENCES professor (id)
+	ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+INSERT INTO professor(surname,first_name,middle_name)
+VALUES ('Працьовита', 'Руслана', 'Андріївна'),
+('Стецько', 'Марія', 'Іванівна'),
+('Перекотиполе', 'Назар', 'Степанович'),
+('Рудненко', 'Олег', 'Романович'),
+('Гора', 'Іван', 'Петрович');
+
+INSERT INTO subject(name,professor_id)
+VALUES ('українська мова',2),
+('англійська мова',1),
+('матаналіз',3),
+('інформаційні технології',4),
+('фізика',5);
+
+INSERT INTO specialty(name)
+VALUES ('Прикладна математика'),
+('Філологія');
+
+INSERT INTO students_group(group_name,date_of_entery,specialty_id)
+VALUES ('ФЛ-25','2012-09-01',2),
+('ПМ-11','2014-09-01',1);
+
+INSERT INTO student(surname,firstname,middle_name,group_id,city,scholarship,rate,birth_date)
+VALUES ('Петренко', 'Іван', 'Михайлович',1,'Львів',1000, 4.5,'1995-05-20'),
+('Зінченко', 'Ольга', 'Юріївна',2,'Київ',1100, 4.0,'1998-05-14'),
+('Маккаренко', 'Любов', 'Степанівна',1,'Харків',0, 3.8,'1999-07-08');
+
+INSERT INTO education_result(student_id,subject_id,type_of_control,module1_result,module2_result)
+VALUES (1, 2, 'іспит',35,50);

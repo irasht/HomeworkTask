@@ -1,0 +1,317 @@
+4 (Використ підзапитів у конструкції WHERE з викор. IN, ANY, ALL)
+1 SELECT DISTINCT maker
+	FROM product
+	WHERE type = 'pc'
+		AND maker NOT IN (SELECT maker
+			FROM product
+			WHERE type = 'Laptop');
+2 SELECT maker 
+	FROM product 
+	WHERE maker <> all (
+		SELECT maker FROM product 
+		WHERE type ='laptop') 
+			AND type LIKE 'PC';
+3 SELECT maker 
+	FROM product
+	WHERE  type = 'pc' AND NOT maker = ANY (
+		SELECT maker 
+		FROM product
+            WHERE type = 'Laptop') ;	
+4 SELECT DISTINCT maker 
+	FROM product
+	WHERE type = 'pc' AND 
+      maker IN (SELECT maker 
+                    FROM product 
+                    WHERE type = 'Laptop');
+5 SELECT maker FROM product
+	WHERE NOT maker <> ALL(
+	SELECT maker FROM product 
+		WHERE type = 'pc' 
+		AND maker IN (
+			SELECT maker FROM product WHERE type = 'laptop')) 
+		AND (type = 'pc' OR type = 'laptop');
+6 SELECT maker FROM product
+	WHERE maker = ANY(SELECT maker FROM product 
+    WHERE type = 'pc' 
+    AND maker IN (
+  SELECT maker FROM product WHERE type = 'laptop'))
+	AND (type = 'pc' OR type = 'laptop'); 
+7 SELECT DISTINCT maker
+	FROM product
+	WHERE type = 'pc'
+		AND model IN (SELECT model
+			FROM pc);
+8  SELECT c.country, c.class 
+	FROM classes c 
+	WHERE c.country = 'Ukraine' AND EXISTS ( 
+	SELECT c.country, c.class 
+	FROM classes c 
+	WHERE c.country = 'Ukraine' ) 
+	UNION ALL 
+	SELECT c.country, c.class 
+	FROM classes c 
+	WHERE NOT EXISTS (SELECT c.country, c.class 
+	FROM classes c 
+	WHERE c.country = 'Ukraine' );
+8.1	SELECT country, class
+	FROM classes
+	WHERE country IN (SELECT country
+        FROM classes
+        WHERE country = 'Ukraine') OR country <> ALL 
+        (SELECT country
+			FROM classes
+			WHERE country = 'Ukraine');
+9. БД «Кораблі». Знайдіть кораблі, «збережені для майбутніх битв», тобто такі, що були виведені з ладу в одній битві ('damaged'), а потім (пізніше у часі) знову брали участь у битвах. Вивести: ship, battle, date.
+10 SELECT count(*)model 
+	FROM pc
+	WHERE model IN (SELECT model 
+			FROM product
+            WHERE maker = 'A');
+11 SELECT DISTINCT maker
+	FROM product
+	WHERE type = 'pc'
+		AND model NOT IN (SELECT model
+			FROM pc);
+12 SELECT model, price
+	FROM laptop
+	WHERE price > ANY(SELECT price
+			FROM pc);
+-------------------------------------------------------------
+5 (Використання підзапитів з лог. операцією EXISTS)
+1 SELECT maker
+	FROM product
+	WHERE EXISTS( SELECT model
+        FROM pc
+        WHERE pc.model = product.model);
+2 SELECT DISTINCT maker
+	FROM product
+	WHERE EXISTS (SELECT model
+      FROM pc 
+      WHERE model=product.model AND speed>=750 );
+3 SELECT DISTINCT maker
+	FROM product
+	WHERE EXISTS (SELECT model
+      FROM pc 
+      WHERE model=product.model AND speed>=750 
+      union
+      SELECT model
+      FROM laptop 
+      WHERE model=product.model AND speed>=750 );	  
+4 SELECT DISTINCT maker
+	FROM product
+	WHERE EXISTS (SELECT model,''
+      FROM printer 
+      WHERE model=product.model 
+      union
+      SELECT model,max(speed)
+      FROM pc 
+      WHERE model=product.model );
+4. БД «Комп. фірма». Знайдіть виробників принтерів, що
+випускають ПК з найвищою швидкістю процесора. Виведіть:
+maker.
+5. За Вашингтонським міжнародним договором від початку 1922р. заборонялося будувати лінійні кораблі водотоннажністю понад 35 тис. тонн. Вкажіть кораблі, що порушили цей договір (враховувати лише кораблі з відомим спуском на воду, тобто з таблиці Ships). Виведіть: name, launched, displacement.
+6. БД «Кораблі». Знайдіть класи кораблів, у яких хоча б один корабель був затоплений у битвах. Вивести: class. (Назви класів кораблів визначати за таблицею Ships, якщо його там немає, тоді порівнювати чи його назва не співпадає з назвою класу, тобто він є головним)
+7 SELECT DISTINCT maker
+    FROM Product AS pc_product
+    WHERE type = 'Laptop' AND 
+       EXISTS (SELECT maker 
+                      FROM Product
+                      WHERE type = 'Printer' AND
+                            maker = pc_product.maker
+                      );
+8 SELECT DISTINCT maker
+    FROM Product AS pc_product
+    WHERE type = 'Laptop' AND 
+        NOT  EXISTS (SELECT maker 
+                      FROM Product
+                      WHERE type = 'Printer' AND
+                            maker = pc_product.maker
+                      );
+-------------------------------------------------------------
+6 (Конкатенація стрічок чи мат. обчислення чи робота з датами)
+1 SELECT CONCAT('середня ціна = ', CAST(AVG(price) AS CHAR)) AS result
+	FROM pc;
+2 SELECT 
+    CONCAT(code,
+            '  модель: ',
+            model,
+            ',  швидкість процесора :',
+            speed,
+            ',  об’єм пам’яті: ',
+            ram,
+            ',  розмір диску: ',
+            hd,
+            ',  швидкість CD: ',
+            cd,
+            ',  ціна: ',
+            price) as result
+	FROM pc;
+3 SELECT DATE_FORMAT(date,"%Y.%m.%d ") as date 
+	FROM income;
+4 UPDATE outcomes 
+	SET result = 'окей'
+	WHERE result = 'OK';
+ UPDATE outcomes 
+	SET result = 'затонув'
+	WHERE result = 'sunk';
+ UPDATE outcomes 
+	SET result = 'пошкоджено'
+	WHERE result = 'damaged';
+ SELECT * FROM outcomes;
+5 SELECT 
+    trip_no,
+    date,
+    ID_psg,
+    CONCAT('ряд: ', SUBSTRING(place, 1, 1)) AS `row`,
+    CONCAT('місце: ', SUBSTRING(place, 2, 1)) AS `plase`
+	FROM Pass_in_trip;
+6 SELECT 
+    trip_no,
+    ID_comp,
+    plane,
+    CONCAT('from ', town_from, ' to ', town_to) AS route,
+    time_out,
+    time_in
+	FROM trip
+-------------------------------------------------------------
+7 (Статистичні функції та робота з групами)
+1 SELECT model, price
+	FROM printer 
+	WHERE price = 
+		(SELECT MAX(price) 
+			FROM printer );
+2 SELECT DISTINCT p.type, p.model, l.speed
+	FROM laptop l
+	JOIN product p ON l.model = p.model
+	WHERE l.speed < (SELECT MIN(speed)
+        FROM pc);
+3 SELECT DISTINCT product.maker, printer.price 
+	FROM product, printer 
+	WHERE product.model = printer.model 
+		AND printer.color = 'y' 
+		AND printer.price = ( 
+			SELECT MIN(price) FROM printer 
+			WHERE printer.color = 'y' );
+4 SELECT maker, COUNT(model) AS amount
+	FROM product
+	WHERE type = 'pc'
+	GROUP BY maker
+	HAVING COUNT(model) >= 2;
+5 SELECT AVG(pc.hd) as hd_avg
+	FROM pc, product 
+	WHERE product.model = pc.model 
+	AND product.maker IN (SELECT DISTINCT maker 
+	FROM product WHERE product.type = 'printer');
+6 SELECT date, COUNT(trip_no) AS trip
+	FROM pass_in_trip
+	WHERE trip_no IN (SELECT trip_no
+        FROM trip
+        WHERE town_from = 'London');
+7. БД «Аеропорт». Визначіть дні, коли було виконано
+максимальну кількість рейсів до міста 'Moscow'. Вивести: date, число рейсів.
+8. БД «Кораблі». Для кожної країни визначити рік, у якому було спущено на воду максимальна кількість її кораблів. У випадку, якщо виявиться декілька таких років, тоді взяти мінімальний з
+них. Вивести: country, кількість кораблів, рік.
+9. БД «Кораблі». Вкажіть битви, у яких брало участь по крайній мірі два корабля однієї і тієї ж країни (Вибір країни здійснювати через таблицю Ships, а назви кораблів для таблиці Outcomes, що відсутні у таблиці Ships, не брати до уваги).
+Вивести: назву битви, країну, кількість кораблів.
+---------------------------------------------------------------
+8 (Підзапити у якості обчислювальних стовпців)
+1 SELECT maker, (SELECT COUNT(*) FROM pc
+    JOIN product ON product.model = pc.model
+    WHERE product.maker = pr.maker) AS pc,
+    (SELECT COUNT(*) FROM laptop
+    JOIN product ON product.model = laptop.model
+    WHERE product.maker = pr.maker) AS laptop,
+    (SELECT COUNT(*) FROM printer
+    JOIN product ON product.model = printer.model
+     WHERE product.maker = pr.maker) AS printer
+    FROM product pr;
+	GROUP BY maker;
+2 SELECT product.maker, AVG(screen) 
+	FROM laptop 
+	LEFT JOIN product ON product.model = laptop.model 
+	GROUP BY product.maker;
+3 SELECT product.maker, MAX(pc.price) 
+	FROM product, pc 
+	WHERE product.model = pc.model 
+	GROUP BY product.maker;
+4 SELECT product.maker, MIN(pc.price) 
+	FROM product, pc 
+	WHERE product.model = pc.model 
+	GROUP BY product.maker;
+5 SELECT pc.speed, AVG(pc.price) 
+	FROM pc 
+	WHERE pc.speed > 600 
+	GROUP BY pc.speed;
+6 SELECT product.maker, AVG(pc.hd) as hd_avg 
+	FROM pc, product WHERE product.model = pc.model 
+	AND product.maker IN ( SELECT DISTINCT maker 
+	FROM product 
+	WHERE product.type = 'printer') 
+	GROUP BY maker;
+7. БД «Кораблі». Вкажіть назву, водотоннажність та число гармат кораблів, що брали участь у битві при 'Guadalcanal'. Вивести: ship, displacement, numGuns. (Підказка: використовувати підзапити у якості обчислювальних стовпців)
+8. БД «Кораблі». Вкажіть назву, країну та число гармат кораблів, що були пошкоджені у битвах. Вивести: ship, country, numGuns. (Підказка: використовувати підзапити у якості
+обчислювальних стовпців)
+-------------------------------------------------------------
+9 (Оператор CASE)
+1 SELECT maker, model,  
+	CASE type
+	WHEN 'PC' THEN CONCAT('yes (', CAST((SELECT COUNT(*) FROM pc
+		JOIN product ON  product.model = pc.model 
+			WHERE product.maker = p1.maker) AS CHAR), ')')
+	ELSE 'no'
+	END AS pc
+	FROM product p1;
+2. БД «Фірма прий. вторсировини». Приймаючи, що прихід та розхід грошей на кожному пункті прийому фіксується не частіше одного разу на день (лише таблиці Income_o та Outcome_o), написати запит з такими вихідними даними: point (пункт), date (дата), inc (прихід), out (розхід). (Підказка:використовувати зовнішнє з’єднання та оператор CASE)
+3 SELECT DISTINCT CASE
+			WHEN numGuns = 8 THEN ships.name
+            WHEN type = 'bb' THEN ships.name
+            WHEN country = 'USA' THEN ships.name
+            WHEN launched = 1915 THEN ships.name
+            WHEN class = 'Kongo' THEN ships.name
+		END AS result
+	FROM classes
+JOIN ships USING (class);
+4. БД «Аеропорт». Для кожного рейсу (таблиця Trip) визначити тривалість його польоту. Вивести: trip_no, назва компанії, plane, town_from, town_to, тривалість польоту. (Підказка:використати для перевірки умов оператор CASE)
+5. БД «Фірма прий. вторсировини». Визначіть лідера за сумою виплат у змаганні між кожною парою пунктів з однаковими номерами із двох різних таблиць – Outcome та Outcome_o – на кожний день, коли здійснювався прийом вторинної сировини хоча б на одному з них. Вивести: Номер пункту, дата, текст: – 'once a day', якщо сума виплат є більшою у фірми зі звітністю один раз на день; – 'more than once a day', якщо – у фірми зі звітністю декілька разів на день; – 'both', якщо сума виплат є однаковою. (Підказка: для з’єднання таблиць використовувати повне зовнішнє з’єднання, а для перевірки умов оператор CASE; для пунктів що не мають у певні дні видачі грошей – необхідно обробляти NULL-значення за допомогою перевірки умови IS [NOT] NULL)
+-------------------------------------------------------------
+10 (Об’єднання UNION)
+1 SELECT DISTINCT product.model, pc.price 
+	FROM Product JOIN pc ON product.model = pc.model WHERE maker = 'B' 
+	UNION 
+  SELECT DISTINCT product.model, laptop.price 
+	FROM product JOIN laptop ON product.model=laptop.model WHERE maker='B' 
+	UNION 
+  SELECT DISTINCT product.model, printer.price 
+	FROM product JOIN printer ON product.model=printer.model WHERE maker='B';
+2 SELECT (SELECT DISTINCT type 
+	FROM product 
+    WHERE type='laptop')as type, model, max(price)
+FROM laptop
+UNION SELECT(SELECT DISTINCT type 
+	FROM product 
+    WHERE type='printer')as type, model, max(price)
+FROM printer
+UNION SELECT(SELECT DISTINCT type 
+	FROM product 
+    WHERE type='pc')as type, model, max(price)
+FROM pc;
+3  SELECT SUM(price) as price
+	FROM (SELECT 
+			(SELECT DISTINCT type
+				FROM product 
+				WHERE type = 'laptop' AND maker = 'A') AS type,
+			AVG(price) AS price
+		FROM laptop
+	UNION  SELECT 
+			(SELECT DISTINCT type 
+				FROM product
+				WHERE type = 'pc' AND maker = 'A') AS type,
+				AVG(price) AS price
+		FROM pc ) as sum;
+4. БД «Кораблі». Перерахуйте назви головних кораблів, що є наявними у БД (врахувати також і кораблі з таблиці Outcomes). Вивести: назва корабля, class. (Підказка: використовувати оператор UNION та операцію EXISTS) 
+5. БД «Кораблі». Знайдіть класи, у яких входить лише один корабель з усієї БД (врахувати також кораблі у таблиці Outcomes, яких немає у таблиці Ships). Вивести: class. (Підказка: використовувати оператор UNION та операцію
+EXISTS)
+6. БД «Кораблі». Для кожного класу порахувати кількість
+кораблів, що входить до нього (врахувати також кораблі у таблиці Outcomes, яких немає у таблиці Ships). Вивести: class, кількість кораблів у класі. (Підказка: використовувати оператор UNION та операцію EXISTS)
+7. БД «Кораблі». Знайдіть класи, в які входять лише один або два кораблі з цілої БД (врахувати також кораблі у таблиці Outcomes, яких немає у таблиці Ships). Вивести: class, кількість кораблів у класі. (Підказка: використовувати оператор UNION та операцію EXISTS)
+8. БД «Кораблі». Знайдіть назви усіх кораблів з БД, про які можна однозначно сказати, що вони були спущені на воду до 1942 р. Вивести: назву кораблів. (Підказка: використовувати оператор UNION )
