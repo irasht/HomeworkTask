@@ -40,6 +40,9 @@ public class Dog {
     public String myMethodOne(String... args) {
         return args + " : myMethodOne";
     }
+    private void privateMethod() {
+        System.out.println("privateMethod()");
+    }
 
     @Override
     public String toString() {

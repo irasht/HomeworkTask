@@ -21,23 +21,32 @@ public class ClassInfo<P> {
     }
 
     public String getSuperClass() {
-        return Dog.class.getSuperclass().getName();
+        return Dog.class.getSuperclass().getSimpleName();
     }
 
-    public Type[] getImplementsInterfaces() {
-        return pClass.getGenericInterfaces();
+    public void getImplementsInterfaces() {
+        Type[] types = pClass.getGenericInterfaces();
+        for (Type type : types) {
+            System.out.println("  " + type.getTypeName());
+        }
     }
 
-    public Field[] getPublicClassFields() {
-        return pClass.getFields();
+    public void getPublicClassFields() {
+        Field[] fields = pClass.getDeclaredFields();
+        for (Field field : fields) {
+            System.out.println("  " + field.getName());
+        }
     }
 
     public Constructor[] getPublicConstructor() {
         return pClass.getConstructors();
     }
 
-    public Method[] getPublicClassMethod() {
-        return pClass.getMethods();
+    public void getPublicClassMethod() {
+        Method[] methods = pClass.getMethods();
+        for (Method method : methods) {
+            System.out.println("  " + method.getName());
+        }
     }
 
     public Annotation[] getClassAnnotation() {
@@ -54,17 +63,14 @@ public class ClassInfo<P> {
         System.out.println("*****getSuperClass()*****");
         System.out.println(classInfo.getSuperClass());
         System.out.println("*****getImplementsInterfaces()*****");
-        Arrays.stream(classInfo.getImplementsInterfaces())
-                .forEach(System.out::println);
+        classInfo.getImplementsInterfaces();
         System.out.println("*****getPublicClassFields()*****");
-        Arrays.stream(classInfo.getPublicClassFields())
-                .forEach(System.out::println);
+        classInfo.getPublicClassFields();
         System.out.println("*****getPublicConstructor()*****");
         Arrays.stream(classInfo.getPublicConstructor())
                 .forEach(System.out::println);
         System.out.println("*****getPublicClassMethod()*****");
-        Arrays.stream(classInfo.getPublicClassMethod())
-                .forEach(System.out::println);
+        classInfo.getPublicClassMethod();
         System.out.println("*****getClassAnnotation()*****");
         Arrays.stream(classInfo.getClassAnnotation())
                 .forEach(System.out::println);
